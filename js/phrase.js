@@ -1,39 +1,43 @@
 class Phrase {
-  constructor() {
-    this.newPhrase = this.getPhrase;
+  constructor(phrase) {
+    this.phrase = phrase;
   }
-
   /**
-   * Return array of each letter in the phrase
+   *  Adds letter placeholders to the display when the game starts
    */
-  get getPhrase(){
-    const letters =[]
-    const phrase = document.querySelectorAll('.letter');
-    phrase.forEach(letter => {
-      letters.push(letter.textContent)
-    })
-    return letters
-  }
-
-  /**
-  * Reveal matched letter in the phrase
-  * @para   {DOM element}    selectedKey - clicked or pressed Key
-  */
-  showLetter(selectedKey){
-    const match = document.querySelectorAll(`li.${selectedKey.textContent}`);
-    match.forEach(letter => {
-      letter.className += " show";
+  addPhraseToDisplay (){
+    this.phrase.split("").forEach(letter => {
+      const addLetter = document.createElement('li')
+      addLetter.textContent = letter;
+      if (letter !== " "){
+        addLetter.classList.add ('hide', 'letter', `${letter}`)
+      }else{
+        addLetter.classList.add ('hide', 'space')
+      }
+      document.querySelector('#phrase ul').appendChild(addLetter)
     })
   }
 
   /**
-   * Reset. Hide all reveal letter
+   *  Checks to see if letter selected by player matches a letter in the phrase.
+   *  @para   {DOM element}   selectedKey - clicked or pressed key
+   *  @return {Boolean}       return true or false
    */
-  resetPhrase(){
-    const show = document.querySelectorAll('.show');
-    show.forEach(letter => {
-      letter.classList.remove('show');
-    })
+  checkLetter(selectedKey){
+    if (this.phrase.includes(selectedKey.textContent)) {
+      return true;
+    }else {
+      return false;
+    }
+  }
 
+  /**
+   *  Reveals the letter(s) on the board that matches player's selection.
+   *  @para   {DOM element}   selectedKey - clicked or pressed key
+   */
+  showMatchedLetter(selectedKey){
+      document.querySelectorAll(`li.${selectedKey.textContent}`).forEach(letter =>{
+        letter.classList.add('show');
+    })
   }
 }

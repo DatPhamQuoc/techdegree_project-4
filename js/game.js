@@ -1,91 +1,102 @@
-class Game {
+ class Game {
   constructor(){
-    this.phrase = new Phrase();
-    this.heart =  new Heart();
-    this.keyboard = new Keyboard();
-    this.ready = false;
+    this.missed = 0;
+    this.phrases = ['how are you',
+                    'i am fine',
+                    'thank you',
+                    'see you again'];
+    this.addClassToKey = this.addClassToKey();
   }
 
   /**
-   * Initializes the game
+   *  Randomly retrieves one of the phrases stored in the phrases array.
+   *   @return {Array}       return random phrase
    */
-  startGame() {
-    this.ready = true
+  getRandomPhrase(){
+    const rndNum= Math.floor(Math.random()*this.phrases.length);
+    return this.phrases[rndNum];
   }
 
   /**
-  * Branches code, depending on what key player presses
-  * @para   {DOM element}    selectedKey - clicked or pressed Key
-  */
-  selectionHandler(selectedKey) {
-    if(this.ready) {
-      if (this.checkMatchLetter(selectedKey)) {
-        selectedKey.className += ' chosen';
-        this.phrase.showLetter(selectedKey);
-      }else {
-        selectedKey.className += ' wrong';
-        this.heart.removeLife();
-      }
-      if (this.checkWin()){
-        this.gameOver('You Win !', 'win')
-      }
-      if (this.checkLose()){
-        this.gameOver('You Lose !', 'lose')
-      }
+   *  Checks to see if the button clicked by the player matches a letter in the phrase.
+   *  @para   {DOM element}   selectedKey - clicked or pressed key
+   */
+  handleInteraction(selectedKey){
+    if(this.phrase.checkLetter(selectedKey)){
+      selectedKey.classList.add('chosen')
+      this.phrase.showMatchedLetter(selectedKey)
+    }else{
+      selectedKey.classList.add('wrong')
+      this.removeLife();
+    }
+    if (this.checkForWin()){
+      this.gameOver('You win!', 'win')
+    }
+    if(this.missed === 5) {
+      this.gameOver('Better luck next time', 'lose')
     }
   }
 
   /**
-  * Check if selected key match any letter in the phrase
-  * @para   {DOM element}    selectedKey - clicked or pressed Key
-  * @return {boolean}        return true or false
-  */
-  checkMatchLetter (selectedKey) {
-    return this.phrase.newPhrase.includes(selectedKey.textContent);
+   *  Removes a life, removes a heart from the board.
+   */
+  removeLife(){
+    const hearts = document.querySelectorAll("img[src='images/liveHeart.png']");
+    hearts[hearts.length-1].setAttribute('src', 'images/lostHeart.png')
+    this.missed += 1;
   }
 
   /**
-  * Check if there a win after each turn
-  * @return {boolean}       win - return true or false
-  */
-  checkWin () {
-    let win = false;
-    const letterShow = document.querySelectorAll('.show')
-    if (this.phrase.newPhrase.length === letterShow.length && this.heart.count !== 0){
-      return win = true;
+   *  Checks to see if the player has selected all of the letters.
+   *  @return {Boolean}       return true
+   */
+  checkForWin(){
+    const showLetter = document.querySelectorAll('.show')
+    const letterInPhrase = document.querySelectorAll('.letter')
+    if( this.missed !== 5 && showLetter.length === letterInPhrase.length) {
+      return true;
     }
   }
 
   /**
-  * Check if there a lose after each turn
-  * @return {boolean}       lose -  return true or false
-  */
-  checkLose () {
-    let lose = false;
-    if (this.heart.count === 0){
-      return lose = true;
-    }
+   *  Checks to see if letter selected by player matches a letter in the phrase.
+   *  @para   {string}   message - message to the player
+   *  @para   {string}   addClass - add class to #overlay
+   */
+  gameOver(message, addClass){
+    document.querySelector('#game-over-message').textContent = message
+    document.querySelector('#overlay').className = addClass;
+    document.querySelector('#btn__reset').textContent = 'Play again';
+    document.querySelector('#overlay').style.display = "";
   }
 
   /**
-  * Display win(lose) infor
-  * @para  {string}   message -  Game over message
-  * @para  {string}   className -  Add class to '#overlay'
-  */
-  gameOver(message, className){
-    document.querySelector('#game-over-message').textContent = message;
-    document.getElementById('overlay').className = className;
-    document.getElementById('overlay').style.display = '';
-    document.getElementById('btn__reset').textContent = "Play Agian";
-    this.ready = false;
+   *   calls the getRandomPhrase() method,
+      and adds that phrase to the board by
+      calling the Phrase class' addPhraseToDisplay() method..
+   */
+  startGame(){
+    const rndPhrase = this.getRandomPhrase();
+    this.phrase = new Phrase(rndPhrase);
+    this.phrase.addPhraseToDisplay();
   }
 
   /**
-  * Reset game
-  */
-  resetGame(){
-    this.keyboard.resetKeyboard();
-    this.phrase.resetPhrase();
-    this.heart.resetLife();
+   * Restore all life
+   */
+  resetLife(){
+    const hearts = document.querySelectorAll("img");
+    hearts.forEach(heart => {
+      heart.setAttribute('src','images/liveHeart.png')
+    })
+  }
+
+  /**
+   * Add class to each key on the screen by it's content.
+   */
+  addClassToKey(){
+    document.querySelectorAll('.key').forEach(key =>{
+      key.classList.add(`${key.textContent}`);
+    })
   }
 }

@@ -1,35 +1,70 @@
-const game = new Game();
 
-document.getElementById('btn__reset').addEventListener('click', (e) => {
-  if(e.currentTarget.innerHTML === 'Start Game') {
-  game.startGame();
-  document.getElementById('overlay').style.display = 'none';
-}else if (e.currentTarget.innerHTML === 'Play Agian') {
-  game.phrase = new Phrase();
-  game.heart = new Heart();
-  game.resetGame()
-  game.startGame();
-  document.querySelector('#overlay').style.display = 'none';
-}
+/**
+ * Listens for click on `#btn_reset` and calls startGame() on game object
+ */
+document.querySelector('#btn__reset').addEventListener('click', (e) => {
+  if (e.target.textContent === "Start Game"){
+    resetDisplay()
+    game = new Game();
+    game.startGame();
+  }else {
+    restart();
+    resetDisplay()
+    game = new Game();
+    game.missed = 0;
+    game.resetLife();
+    game.startGame();
+
+  }
 })
 
 /**
- * Listens for click on `#qwerty` and calls startGame() on game object
+ * Listens for click on `#qwerty` and calls markButton()
  */
 document.querySelector('#qwerty').addEventListener('click', (e) => {
-  if (e.target.tagName === "BUTTON") {
+  if (e.target.tagName === 'BUTTON'){
     const selectedKey = e.target
-    selectedKey.setAttribute('disabled', true);
-    game.selectionHandler(selectedKey);
+    markButton(selectedKey);
   }
 })
 
 /**
  * Listen for keyboard presses
  */
-document.querySelector('body').addEventListener('keyup', (e) =>{
-  const keyName = e.key;
-  const selectedKey = document.querySelector(`.${keyName}`)
-  selectedKey.setAttribute('disabled', true);
-  game.selectionHandler(selectedKey);
+document.addEventListener('keyup', (e)=>{
+  const selectedKey = document.querySelector(`button.${e.key}`);
+  markButton(selectedKey);
 })
+
+/**
+ * Hide the overlay
+ */
+function resetDisplay(){
+  const overlay = document.querySelector('#overlay');
+  overlay.style.display = 'none'
+}
+
+/**
+ * Disables the button on the onscreen
+  keyboard and calls the handleInteraction() method
+  of the Game class.
+ */
+function markButton(selectedKey){
+  selectedKey.setAttribute('disabled', true)
+  game.handleInteraction(selectedKey);
+}
+
+/**
+ * Listen for keyboard presses
+ */
+function restart(){
+  document.querySelector('ul').innerHTML ="";
+  document.querySelectorAll('.wrong').forEach(button =>{
+    button.classList.remove('wrong');
+    button.disabled = false;
+  })
+  document.querySelectorAll('.chosen').forEach(button =>{
+    button.classList.remove('chosen');
+    button.disabled = false;
+  })
+}
